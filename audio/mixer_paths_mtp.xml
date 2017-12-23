@@ -1094,6 +1094,7 @@
     </path>
 
     <path name="sidetone-handset">
+        <ctl name="RX2 MIX2 INP1" value="ZERO" />
         <path name="sidetone-iir" />
         <ctl name="IIR1 INP1 Volume" value="53" />
         <ctl name="RX1 MIX2 INP1" value="IIR1" />
