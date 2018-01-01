@@ -27,12 +27,8 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #
-PDS=`getprop ro.build.device.name`
-echo "Lenovo" > /sys/class/android_usb/android0/iManufacturer
-echo "$PDS" > /sys/class/android_usb/android0/iProduct
-
-#chown -h root.system /sys/devices/platform/msm_hsusb/gadget/wakeup
-#chmod -h 220 /sys/devices/platform/msm_hsusb/gadget/wakeup
+chown -h root.system /sys/devices/platform/msm_hsusb/gadget/wakeup
+chmod -h 220 /sys/devices/platform/msm_hsusb/gadget/wakeup
 
 # Set platform variables
 if [ -f /sys/devices/soc0/hw_platform ]; then
@@ -108,43 +104,11 @@ fi
 # Allow USB enumeration with default PID/VID
 #
 baseband=`getprop ro.baseband`
-boot_mode=`getprop ro.bootmode`
-usbmode=`getprop persist.sys.usb.mode`
-case "$boot_mode" in
-    "boot-factory" | "ffbm-00" | "ffbm-01" | "ffbm-02")
-		case "$usbmode" in
-			"" | "D3")
-				#setprop persist.sys.usb.mode D1
-				setprop persist.service.adb.secure 0
-			;;
-		esac
-			#setprop persist.sys.usb.config diag,serial_smd,serial_tty,mass_storage,adb
-                        setprop persist.sys.usb.config diag,serial_smd,serial_tty,adb
-			#setprop persist.sys.usb.config diag,serial_smd,rmnet_ipa,adb
-        ;;
-	*)
-		case "$usbmode" in
-			"" | "D1")
-				#setprop persist.sys.usb.config diag,serial_smd,serial_tty,mass_storage,adb
-                                setprop persist.sys.usb.config diag,serial_smd,serial_tty,adb
-			;;
-			*)
-				serialnum=`getprop ro.serialno`
-					case "$serialnum" in
-						"");; #Do nothing, use default serial number
-						*)
-							echo "$serialnum" > /sys/class/android_usb/android0/iSerial
-						;;
-					esac
-			;;
-		esac
-	;;
-esac
 
-# echo 1  > /sys/class/android_usb/f_mass_storage/lun/nofua
+echo 1  > /sys/class/android_usb/f_mass_storage/lun/nofua
 usb_config=`getprop persist.sys.usb.config`
 case "$usb_config" in
-    "none" | "adb") #USB persist config not set, select default configuration
+    "" | "adb") #USB persist config not set, select default configuration
       case "$esoc_link" in
           "PCIe")
               setprop persist.sys.usb.config diag,diag_mdm,serial_cdev,rmnet_qti_ether,mass_storage,adb
@@ -176,7 +140,7 @@ case "$usb_config" in
 	              "msm8937")
 			    case "$soc_id" in
 				    "313" | "320")
-				       setprop persist.sys.usb.config diag,serial_smd,serial_tty,adb
+				       setprop persist.sys.usb.config diag,serial_smd,rmnet_ipa,adb
 				    ;;
 				    *)
 				       setprop persist.sys.usb.config diag,serial_smd,rmnet_qti_bam,adb
@@ -186,7 +150,7 @@ case "$usb_config" in
 	              "msm8952" | "msm8953")
 		          setprop persist.sys.usb.config diag,serial_smd,rmnet_ipa,adb
 		      ;;
-	              "msmcobalt")
+	              "msm8998")
 		          setprop persist.sys.usb.config diag,serial_cdev,rmnet_gsi,adb
 		      ;;
 	              *)
@@ -207,18 +171,24 @@ esac
 case "$target" in
     "msm8996")
         setprop sys.usb.controller "6a00000.dwc3"
+        setprop sys.usb.rndis.func.name "rndis_bam"
 	;;
-    "msmcobalt")
+    "msm8998")
         setprop sys.usb.controller "a800000.dwc3"
+        setprop sys.usb.rndis.func.name "gsi"
 	;;
+    "msmfalcon")
+        setprop sys.usb.controller "a800000.dwc3"
+        setprop sys.usb.rndis.func.name "rndis_bam"
+        ;;
     *)
 	;;
 esac
 
 # check configfs is mounted or not
-#if [ -d /config/usb_gadget ]; then
-#	setprop sys.usb.configfs 1
-#fi
+if [ -d /config/usb_gadget ]; then
+	setprop sys.usb.configfs 1
+fi
 
 #
 # Do target specific things

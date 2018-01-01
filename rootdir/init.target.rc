@@ -45,12 +45,13 @@ on fs
     # these partition flashed on the device. Failure to mount any partition in fstab file
     # results in failure to launch late-start class.
 
-    #wait /dev/block/bootdevice/by-name/cache
-    #mount ext4 /dev/block/bootdevice/by-name/cache /cache nosuid nodev barrier=1
+    wait /dev/block/bootdevice/by-name/cache
+    mount ext4 /dev/block/bootdevice/by-name/cache /cache nosuid nodev barrier=1
 
     wait /dev/block/bootdevice/by-name/persist
     mount ext4 /dev/block/bootdevice/by-name/persist /persist nosuid nodev barrier=1
     mkdir /persist/data 0700 system system
+    mkdir /persist/bms 0700 root system
     restorecon_recursive /persist
 
     wait /dev/block/bootdevice/by-name/dsp
@@ -72,7 +73,7 @@ on post-fs-data
     mkdir /persist/data/sfs 0700 system system
     mkdir /persist/data/tz 0700 system system
     mkdir /data/misc/dts 0770 media audio
-#    mkdir /data/misc/hbtp 0750 system system
+    mkdir /data/misc/hbtp 0750 system system
 
 #start camera server as daemon
 service qcamerasvr /system/bin/mm-qcamera-daemon
@@ -118,7 +119,7 @@ service qseecomd /system/bin/qseecomd
 #service aostlmd /system/bin/aostlmd
 #   class late_start
 #   user system
-#   group system net_raw
+#   group system
 
 service perfd /system/vendor/bin/perfd
    class main
@@ -140,11 +141,6 @@ service thermal-engine /system/vendor/bin/thermal-engine
    socket thermal-recv-passive-client stream 0666 system system
    group root
 
-service time_daemon /system/bin/time_daemon
-   class late_start
-   user root
-   group root
-
 service audiod /system/bin/audiod
    class late_start
    user system
@@ -162,11 +158,6 @@ on boot
     chown system drmrpc /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch
     chown system drmrpc /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/secure_touch_enable
     chown system drmrpc /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/secure_touch
-chown system system /dev/goodix_fp
-chmod 0644 /dev/goodix_fp
-chown system system /sys/devices/soc/soc:goodix_fp/gf_info
-# TP gesture
-    chown system system /sys/goodix_gesture/gesture_enable
 
 service wcnss-service /system/bin/wcnss_service
     class main
@@ -207,11 +198,11 @@ on property:sys.ims.DATA_DAEMON_STATUS=1
     start ims_rtp_daemon
     start imscmservice
 
-# service hbtp /system/vendor/bin/hbtp_daemon
-#    class main
-#    user system
-#    group system
-#    disabled
+service hbtp /system/vendor/bin/hbtp_daemon
+    class main
+    user system
+    group system
+    disabled
 
 service ppd /system/vendor/bin/mm-pp-dpps
     class late_start
@@ -296,31 +287,11 @@ service energy-awareness /system/bin/energy-awareness
     group system
     oneshot
 
-#service mdtpd /system/vendor/bin/mdtpd
-#    class late_start
-#    user root
-#    group system radio drmrpc
+service mdtpd /system/vendor/bin/mdtpd
+    class late_start
+    user root
+    group system radio drmrpc
 
 on boot
     write /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/fw_name PR1702898-s3528t_00260005_00380008.img
     write /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/update_fw 1
-
-service fingerprintd /system/bin/fingerprintd
-    class late_start
-    user system
-service gx_fpd /system/bin/gx_fpd
-    class late_start
-    user root
-    group root system
-
-on property:persist.sys.fp.goodix=0
-    stop gx_fpd
-
-#lizheng add @20170308 for WVL1 key begin
-    service storekeybox /system/bin/sh /system/etc/StoreKeybox.sh
-    oneshot
-    disabled
-
-    on property:persist.sys.storekeybox=1
-    start storekeybox
-#lizheng add @20170308 for WVL1 key end
