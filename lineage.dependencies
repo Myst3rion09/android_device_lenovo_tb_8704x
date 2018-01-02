@@ -1,0 +1,10 @@
+[
+  {
+    "repository": "Myst3rion09/android_kernel_lenovo_msm8953",
+    "target_path": "kernel/lenovo/msm8953"
+  },
+  {
+    "repository": "LineageOS/android_device_qcom_common",
+    "target_path": "device/qcom/common"
+  }
+]

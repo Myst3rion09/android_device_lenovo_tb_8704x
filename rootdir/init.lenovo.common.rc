@@ -1,0 +1,27 @@
+on early-init
+    # Create modem FSG mount point
+    mkdir /fsg 755 root root
+
+service fingerprintd /system/bin/fingerprintd
+    class late_start
+    user system
+
+service gx_fpd /system/bin/gx_fpd
+    class late_start
+    user root
+    group root system
+
+on property:persist.sys.fp.goodix=0
+    stop gx_fpd
+
+on boot
+    # RGB LED
+    chown system system /sys/class/leds/rgb/brightness
+    chmod 0664 /sys/class/leds/rgb/brightness
+    chown system system /sys/class/leds/rgb/blink
+
+    # Fingerprint
+    chown system system /dev/goodix_fp
+    chmod 0644 /dev/goodix_fp
+    chown system system /sys/devices/soc/soc:goodix_fp/gf_info
+    chown system system /sys/goodix_gesture/gesture_enable
