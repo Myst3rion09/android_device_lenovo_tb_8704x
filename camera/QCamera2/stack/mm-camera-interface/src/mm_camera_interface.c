@@ -2097,9 +2097,6 @@ int32_t camera_open(uint8_t camera_idx, mm_camera_vtbl_t **camera_vtbl)
 
     pthread_mutex_lock(&g_intf_lock);
     /* opened already */
-	// LCT_lijianhui_modify_20170306 for fix cts camera MultiCameraRelease failed  begin
-	// rear camera and front camera use the same power pin needed
-#if 0
     if(NULL != g_cam_ctrl.cam_obj[camera_idx]) {
         /* Add reference */
         g_cam_ctrl.cam_obj[camera_idx]->ref_count++;
@@ -2107,23 +2104,7 @@ int32_t camera_open(uint8_t camera_idx, mm_camera_vtbl_t **camera_vtbl)
         LOGD("opened alreadyn");
         *camera_vtbl = &g_cam_ctrl.cam_obj[camera_idx]->vtbl;
         return rc;
-#endif
-    if(NULL != g_cam_ctrl.cam_obj[camera_idx]||NULL != g_cam_ctrl.cam_obj[0]||NULL != g_cam_ctrl.cam_obj[1]) {
-        if(NULL != g_cam_ctrl.cam_obj[camera_idx])
-        {
-            /* Add reference */
-            g_cam_ctrl.cam_obj[camera_idx]->ref_count++;
-            pthread_mutex_unlock(&g_intf_lock);
-            //CDBG("%s: opened alreadyn", __func__);
-            *camera_vtbl = &g_cam_ctrl.cam_obj[camera_idx]->vtbl;
-            return rc;
-        }
-        else{
-            pthread_mutex_unlock(&g_intf_lock);
-            return -EUSERS;
-        }
     }
-	// LCT_lijianhui_modify_20170306 for fix cts camera MultiCameraRelease failed  end
 
     cam_obj = (mm_camera_obj_t *)malloc(sizeof(mm_camera_obj_t));
     if(NULL == cam_obj) {

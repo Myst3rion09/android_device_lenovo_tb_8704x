@@ -7390,7 +7390,6 @@ int QCamera3HardwareInterface::initStaticMetadata(uint32_t cameraId)
 #ifndef USE_HAL_3_3
             // LEVEL_3 - This device will support level 3.
             ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_3;
-            //ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY;//for cts verifier camera its bypass,maybe need to move to some other place
 #else
             ANDROID_INFO_SUPPORTED_HARDWARE_LEVEL_FULL;
 #endif
